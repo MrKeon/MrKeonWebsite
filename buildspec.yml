@@ -15,6 +15,6 @@ phases:
   post_build:
     commands:
       - echo Build completed on $(date +%Y-%m-%d)
-  artifacts:
-    files:
-      - build/static/*
+artifacts:
+  files:
+    - build/static/*
