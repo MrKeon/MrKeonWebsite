@@ -19,3 +19,4 @@ artifacts:
     - build/static/js/*
     - build/static/css/*
     - build/static/media/*
+    - package.json
