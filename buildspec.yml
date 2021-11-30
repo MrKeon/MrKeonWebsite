@@ -16,4 +16,6 @@ phases:
       - ls -a
 artifacts:
   files:
-    - build/static/*
+    - build/static/js/*
+    - build/static/css/*
+    - build/static/media/*
