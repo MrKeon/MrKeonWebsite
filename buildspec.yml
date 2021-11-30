@@ -1,5 +1,4 @@
-version: 0.2
-
+version: 0.1
 phases:
   pre_build:
     commands:
@@ -7,23 +6,30 @@ phases:
       - npm install
   build:
     commands:
-      - echo Build started on $(date +%Y-%m-%d) 
-      - echo Compiling the Node.js code
+      - echo Build started on `date`
       - npm run build
   post_build:
     commands:
-      - echo Build completed on $(date +%Y-%m-%d)
-      - ls -a
+      # copy the contents of /build to S3
+      - aws s3 cp --recursive --acl public-read ./build s3://${DeployBucket}/ 
+      # set the cache-control headers for service-worker.js to prevent
+      # browser caching
+      - >
+        aws s3 cp --acl public-read 
+        --cache-control="max-age=0, no-cache, no-store, must-revalidate" 
+        ./build/service-worker.js s3://${DeployBucket}/
+      # set the cache-control headers for index.html to prevent
+      # browser caching
+      - >
+        aws s3 cp --acl public-read 
+        --cache-control="max-age=0, no-cache, no-store, must-revalidate" 
+        ./build/index.html s3://${DeployBucket}/
+      # invalidate the CloudFront cache for index.html and service-worker.js
+      # to force CloudFront to update its edge locations with the new versions
+      - >
+        aws cloudfront create-invalidation --distribution-id ${Distribution} 
+        --paths /index.html /service-worker.js
 artifacts:
   files:
-    - build/static/js/*
-    - build/static/css/*
-    - build/static/media/*
-    - package.json
-    - asset-manifest.json
-    - favicon.ico
-    - index.html
-    - logo192.png
-    - logo512.png
-    - manifest.json
-    - robots.txt
+    - '**/*'
+  base-directory: build
